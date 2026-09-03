@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Huelva Histórica - Guía Interactiva</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="lang-switcher">
+        <button class="lang-btn active" data-lang="es">ES</button>
+        <button class="lang-btn" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="fr">FR</button>
+    </div>
+
+    <div id="home-view" class="view active">
+        <div class="home-header">
+            <img src="./assets/img/logo.png" alt="Logotipo" class="app-logo" onerror="this.style.display='none'">
+            <h1 data-i18n="homeTitle">Huelva Secreta</h1>
+            <p data-i18n="homeSubtitle">Selecciona una época para explorar</p>
+        </div>
+        <div id="historias-menu" class="menu-container"></div>
+        <button id="btn-legal" class="legal-trigger" data-i18n="legalTrigger">Créditos y Aviso Legal</button>
+    </div>
+
+    <div id="historia-view" class="view hidden">
+        <div class="historia-header">
+            <button id="btn-back-home" class="btn-icon" data-i18n="btnBackMenu">← Volver al Menú</button>
+            <button id="btn-show-map" class="btn-icon" data-i18n="btnShowMap">📍 Ver Ruta Real</button>
+        </div>
+        <img id="historia-img" src="" alt="Ilustración Histórica" class="hero-image">
+        
+        <div class="historia-content">
+            <h2 id="historia-titulo"></h2>
+            <p class="historia-meta"><span id="historia-epoca"></span> | <span id="historia-personaje"></span></p>
+            
+            <div class="personajes-box">
+                <h4 data-i18n="personajesTitle">👥 Sobre los personajes:</h4>
+                <div id="historia-personajes-desc"></div>
+            </div>
+            
+            <div class="tabs-container">
+                <div class="tabs-nav">
+                    <button class="tab-btn active" data-target="tab-escena" data-i18n="tabEscena">🎙️ La Escena</button>
+                    <button class="tab-btn" data-target="tab-historia" data-i18n="tabHistoria">📜 Historia</button>
+                    <button class="tab-btn" data-target="tab-glosario" data-i18n="tabGlosario">📖 Glosario</button>
+                    <button class="tab-btn" data-target="tab-rigor" data-i18n="tabRigor">🔎 Rigor Histórico</button>
+                </div>
+                
+                <div class="tabs-content">
+                    <div id="tab-escena" class="tab-pane active texto-narrativo"></div>
+                    <div id="tab-historia" class="tab-pane texto-narrativo"></div>
+                    <div id="tab-glosario" class="tab-pane texto-narrativo"></div>
+                    <div id="tab-rigor" class="tab-pane texto-narrativo"></div>
+                </div>
+            </div>
+            
+            <div class="reto-container">
+                <h3 data-i18n="retoTitle">🧩 Pregunta Opcional</h3>
+                <p id="reto-pregunta"></p>
+                <div id="reto-opciones" class="opciones-grid"></div>
+                <p id="reto-feedback" class="hidden"></p>
+            </div>
+        </div>
+
+        <div class="audio-player">
+            <div id="audio-playlist" class="audio-playlist"></div>
+            <div class="audio-main-controls">
+                <button id="btn-play-pause">▶</button>
+                <div class="progress-container">
+                    <input type="range" id="audio-progress" value="0" min="0" max="100">
+                </div>
+            </div>
+            <audio id="audio-element" src=""></audio>
+        </div>
+    </div>
+
+    <div id="map-view" class="view hidden">
+        <div class="map-header">
+            <button id="btn-back-historia" class="btn-icon" data-i18n="btnBackHistory">← Volver a la Historia</button>
+            <h2 id="map-location-title">Destino</h2>
+        </div>
+        <div id="offline-warning" class="hidden" data-i18n="offlineWarning">Modo Offline: Mapa real no disponible sin conexión.</div>
+        <div id="real-map"></div>
+    </div>
+
+    <div id="image-modal" class="image-modal hidden">
+        <span class="modal-close">&times;</span>
+        <img id="modal-img" src="" alt="Imagen ampliada">
+    </div>
+
+    <div id="glossary-popover" class="glossary-popover hidden">
+        <div id="popover-arrow" class="popover-arrow"></div>
+        <span class="popover-close">&times;</span>
+        <p id="glossary-popover-text"></p>
+    </div>
+
+    <div id="legal-modal" class="legal-modal hidden">
+        <div class="legal-modal-content">
+            <span class="modal-close" id="legal-modal-close">&times;</span>
+            <h2>CRÉDITOS Y AVISO LEGAL</h2>
+            <h3>1. Desarrollo y Propiedad Intelectual</h3>
+            <p>La conceptualización, el diseño de la interfaz de usuario (UI/UX), la arquitectura del software y el código fuente de esta aplicación interactiva son obra original y propiedad exclusiva de <strong>Sergio Linares Fernández</strong>. Quedan reservados todos los derechos sobre la programación y la estructura de la plataforma.</p>
+            <h3>2. Creación de Contenidos y Uso de IA</h3>
+            <p>Esta aplicación tiene un propósito turístico, de entretenimiento y de puesta en valor del patrimonio de Huelva. Todos los contenidos (textos históricos, guiones narrativos, imágenes y pistas de audio) han sido elaborados con la asistencia de Inteligencia Artificial Generativa y posterior curación humana para asegurar su calidad y evitar conflictos de derechos de autor de terceros.</p>
+            <h3>3. Licencias Dramáticas y Descargo de Responsabilidad</h3>
+            <p>Aunque se busca el mayor rigor divulgativo posible en los hechos clave, toda la obra emplea licencias literarias y dramáticas. Por consiguiente, cualquier apartado (tanto escenas sonoras como textos históricos) puede presentar inexactitudes, anacronismos o modificaciones intencionadas con fines de entretenimiento. Esto incluye la creación de diálogos y personajes ficticios, así como la recreación imaginada o dramatizada de figuras y situaciones históricas reales.</p>
+            <h3>4. Derechos de Uso</h3>
+            <p>© 2026 <strong>Sergio Linares Fernández</strong>. Todos los derechos reservados sobre el software y la composición final de la obra derivada. Queda prohibida la reproducción, distribución o modificación no autorizada del código y diseño de esta plataforma sin el consentimiento expreso de su autor.</p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
